@@ -35,7 +35,7 @@ class StreamingController:
         
         channel = self.connection.channel()
 
-        channel.queue_declare(queue='cidades', durable=True)
+        channel.queue_declare(queue=self.settings.mqqueue, durable=True)
 
         channel.basic_publish(
             exchange='',
