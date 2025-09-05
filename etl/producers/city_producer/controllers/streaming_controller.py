@@ -1,5 +1,6 @@
 import pika
 from pika.exceptions import AMQPConnectionError
+from pika.channel import Channel
 from schemas.city_schema import CitySchema
 from utils.settings import Settings
 import logging
@@ -10,6 +11,7 @@ class StreamingController:
     def __init__(self):
         self.settings = Settings()
         self.connection : pika.BlockingConnection
+        self.channel : Channel
     
     def connect_to_broker(self) -> bool:
         
@@ -20,6 +22,9 @@ class StreamingController:
             )
 
             logger.info('Connected to broker.')
+
+            self.channel = self.connection.channel()
+            self.channel.queue_declare(queue='cidades', durable=True)
 
             return True
         
@@ -32,21 +37,18 @@ class StreamingController:
 
         if self.connection is None:
             raise ConnectionError('Error connecting to broker')
-        
-        channel = self.connection.channel()
 
-        channel.queue_declare(queue=self.settings.mqqueue, durable=True)
-
-        channel.basic_publish(
+        self.channel.basic_publish(
             exchange='',
             routing_key=self.settings.mqqueue,
             body=city.model_dump_json(),
             properties=pika.BasicProperties(delivery_mode=2)
         )
 
-        channel.close()
+        
 
     def close_connection(self) -> None:
+        self.channel.close()
         self.connection.close()
 
 

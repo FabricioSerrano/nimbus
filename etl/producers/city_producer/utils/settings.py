@@ -1,12 +1,10 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-
 class Settings(BaseSettings):
 
     data_url : str
     log_level : str
-    log_dir : str
     mqhost : str
     mqqueue : str
 
