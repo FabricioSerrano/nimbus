@@ -34,10 +34,9 @@ def callback(ch, method, properties, body):
     try:
         data = json.loads(body)
 
-        city = CitySchema(**data)  # validação Pydantic
+        city = CitySchema(**data) 
 
-        # data_controller.save_city_to_delta(city)
-        print(city)
+        data_controller.push_data(city)
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
@@ -50,7 +49,6 @@ def callback(ch, method, properties, body):
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
 
 def listen() -> None:
-
     connection = connect_to_broker()
 
     if not isinstance(connection, pika.BlockingConnection):

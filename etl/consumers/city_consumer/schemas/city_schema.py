@@ -1,14 +1,13 @@
-from typing import Annotated
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class CitySchema(BaseModel):
 
     codigo_ibge : int
-    nome_municipio : Annotated[str, Field(min_length=1)]
+    nome_municipio : str
     capital : bool
     codigo_uf : int
-    uf : Annotated[str, Field(min_length=2, max_length=2)]
-    estado : Annotated[str, Field(min_length=1)]
+    uf : str
+    estado : str
     latitude : float
     longitude : float

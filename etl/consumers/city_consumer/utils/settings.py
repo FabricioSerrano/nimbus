@@ -9,7 +9,10 @@ class Settings(BaseSettings):
     mqqueue : str
     mquser : str
     mqpass : str
-    datalakepath : str
+    mysqlhost : str
+    mysqluser : str
+    mysqlpass : str
+    mysqldatabase: str
 
     model_config = SettingsConfigDict(
         env_file='.env', 
