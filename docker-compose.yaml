@@ -1,6 +1,8 @@
 services:
   rabbitmq:
-    image: rabbitmq:3.12-management
+    restart: always
+    build:
+      context: ./rabbitmq
     container_name: rabbitmq
     ports:
       - "5672:5672"     # Porta AMQP (apps/produtores/consumidores)
@@ -11,20 +13,31 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
       RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbitmq_prometheus return_per_object_metrics true"
     networks:
-      - monitor-net
+      - nimbus-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   prometheus:
-    image: prom/prometheus:latest
+    restart: always
+    build:
+      context: ./prometheus
     container_name: prometheus
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus:/etc/prometheus
     ports:
       - "9090:9090"
     networks:
-      - monitor-net
+      - nimbus-net
+    depends_on:
+      - rabbitmq
 
   grafana:
-    image: grafana/grafana:latest
+    restart: always
+    build:
+      context: ./grafana
     container_name: grafana
     ports:
       - "3000:3000"
@@ -32,8 +45,50 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
     networks:
-      - monitor-net
+      - nimbus-net
+    depends_on:
+      - prometheus
+
+  mysql:
+    restart: always
+    build:
+      context: ./mySQL
+    container_name: mysql
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
+    networks:
+      - nimbus-net
+
+
+  city-consumer:
+    restart: always
+    build:
+      context: ./etl/consumers/city_consumer
+    container_name: city-consumer
+    env_file:
+      - ./etl/consumers/city_consumer/.env
+    networks:
+      - nimbus-net
+    depends_on:
+      - rabbitmq
+      - mysql
+    
+  city-producer:
+    build:
+      context: ./etl/producers/city_producer
+    container_name: city-producer
+    env_file:
+      - ./etl/producers/city_producer/.env
+    networks:
+      - nimbus-net
+    depends_on:
+      - rabbitmq
+      - mysql
 
 networks:
-  monitor-net:
+  nimbus-net:
     driver: bridge
+
+volumes:
+  db_data:
