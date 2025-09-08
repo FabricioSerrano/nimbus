@@ -55,13 +55,12 @@ services:
       context: ./mySQL
     container_name: mysql
     env_file:
-      - .env
+      - mySQL/.env
     volumes:
       - db_data:/var/lib/mysql
-      - ./init:/docker-entrypoint-initdb.d
+      - ./mysql:/docker-entrypoint-initdb.d
     networks:
       - nimbus-net
-
 
   city-consumer:
     restart: always
