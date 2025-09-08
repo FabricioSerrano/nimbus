@@ -137,9 +137,11 @@ celerybeat.pid
 *.pid
 
 # RabbitMQ
-mnesia/
-rabbitmq/
-rabbitmq-data/
+# mnesia/
+# rabbitmq/
+# rabbitmq-data/
+
+.flake8
 
 # ActiveMQ
 activemq-data/
