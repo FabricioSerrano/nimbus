@@ -54,6 +54,8 @@ services:
     build:
       context: ./mySQL
     container_name: mysql
+    env_file:
+      - .env
     volumes:
       - db_data:/var/lib/mysql
       - ./init:/docker-entrypoint-initdb.d
