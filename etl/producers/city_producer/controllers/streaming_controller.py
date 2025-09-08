@@ -28,8 +28,8 @@ class StreamingController:
 
             return True
         
-        except AMQPConnectionError:
-            logger.error('Error connecting to Broker.')
+        except AMQPConnectionError as er:
+            logger.error(f'Error connecting to Broker. {er}')
             return False
 
 
