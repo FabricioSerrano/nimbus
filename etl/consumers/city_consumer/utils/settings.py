@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     mysqluser : str
     mysqlpass : str
     mysqldatabase: str
+    weatherqueue : str
 
     model_config = SettingsConfigDict(
         env_file='.env', 

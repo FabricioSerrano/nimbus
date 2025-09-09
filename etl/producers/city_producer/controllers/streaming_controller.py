@@ -24,7 +24,7 @@ class StreamingController:
             logger.info('Connected to broker.')
 
             self.channel = self.connection.channel()
-            self.channel.queue_declare(queue='cidades', durable=True)
+            self.channel.queue_declare(queue=self.settings.mqqueue, durable=True)
 
             return True
         

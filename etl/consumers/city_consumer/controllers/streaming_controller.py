@@ -30,6 +30,25 @@ def connect_to_broker() -> pika.BlockingConnection:
         logger.error('Error connecting to Broker.')
         return None
     
+def push_city_to_weather_queue(city : CitySchema) -> None:
+
+    _local_connection = connect_to_broker()
+
+    channel = _local_connection.channel()
+    channel.queue_declare(queue=settings.weatherqueue, durable=True)
+
+    channel.basic_publish(
+        exchange='',
+        routing_key=settings.weatherqueue,
+        body=city.model_dump_json(),
+        properties=pika.BasicProperties(delivery_mode=2)
+    )
+
+    channel.close()
+    _local_connection.close()
+
+    logger.info("City pushed to weather queue.")
+    
 def callback(ch, method, properties, body):
     try:
         data = json.loads(body)
@@ -37,6 +56,8 @@ def callback(ch, method, properties, body):
         city = CitySchema(**data) 
 
         data_controller.push_data(city)
+
+        push_city_to_weather_queue(city)
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
 

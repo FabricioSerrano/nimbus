@@ -44,6 +44,8 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
     networks:
       - nimbus-net
     depends_on:
@@ -87,9 +89,23 @@ services:
       - rabbitmq
       - mysql
 
+  weather-producer:
+    restart: always
+    build:
+      context: ./etl/producers/weather_producer
+    container_name: weather-producer
+    env_file:
+      - ./etl/producers/weather_producer/.env
+    networks:
+      - nimbus-net
+    depends_on:
+      - rabbitmq
+      - mysql
+
 networks:
   nimbus-net:
     driver: bridge
 
 volumes:
   db_data:
+  grafana-storage:
